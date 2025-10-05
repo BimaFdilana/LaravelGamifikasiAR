@@ -42,4 +42,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function missionsCompleted()
+    {
+        return $this->belongsToMany(Mission::class, 'user_missions')->withTimestamps();
+    }
+
+    public function badgesEarned()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')->withTimestamps();
+    }
 }

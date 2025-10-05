@@ -9,10 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
+            $table->string('name'); // Contoh: Perpustakaan, Aula
+            $table->text('description');
+            $table->string('marker_id'); // ID untuk dikenali Vuforia/AR SDK
             $table->timestamps();
         });
     }

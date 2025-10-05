@@ -9,10 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('user_missions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mission_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['completed', 'in_progress'])->default('in_progress');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
     }
