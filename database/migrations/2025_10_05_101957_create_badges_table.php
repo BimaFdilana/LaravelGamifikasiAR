@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('badges', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Contoh: Ahli Perpustakaan
+            $table->string('name');
             $table->string('icon_url');
             $table->timestamps();
         });
