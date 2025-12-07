@@ -13,6 +13,8 @@ class UserMission extends Model
     protected $fillable = [
         'user_id',
         'mission_id',
+        'status',
+        'completed_at',
     ];
 
     public function user(): BelongsToMany

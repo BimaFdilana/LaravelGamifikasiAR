@@ -11,27 +11,25 @@ class Mission extends Model
 {
     use HasFactory;
 
-    /**
-     * Attribut yang bisa diisi secara massal (mass assignable).
-     */
     protected $fillable = [
         'title',
         'description',
+        'type',
+        'target_image_name',
+        'quiz_data',
         'points_reward',
         'badge_reward_id',
     ];
 
-    /**
-     * Relasi ke Lencana (Badge) yang menjadi hadiah.
-     */
+    protected $casts = [
+        'quiz_data' => 'array',
+    ];
+
     public function badge(): BelongsTo
     {
         return $this->belongsTo(Badge::class, 'badge_reward_id');
     }
 
-    /**
-     * Relasi ke User yang telah menyelesaikan misi ini.
-     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_missions');

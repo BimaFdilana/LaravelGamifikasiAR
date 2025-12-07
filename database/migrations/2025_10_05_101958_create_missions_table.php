@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
+            $table->enum('type', ['book', 'building', 'quiz'])->default('book');
+            $table->string('target_image_name')->nullable();
+            $table->json('quiz_data')->nullable();
             $table->integer('points_reward');
-            $table->foreignId('badge_reward_id')->nullable()->constrained('badges');
+            $table->unsignedBigInteger('badge_reward_id')->nullable();
             $table->timestamps();
         });
     }

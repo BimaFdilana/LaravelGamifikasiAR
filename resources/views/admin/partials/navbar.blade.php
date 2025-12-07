@@ -19,10 +19,6 @@
                     <a class="nav-link {{ request()->routeIs('admin.badges.*') ? 'active' : '' }}"
                         href="{{ route('admin.badges.index') }}">Lencana</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}"
-                        href="{{ route('admin.locations.index') }}">Lokasi AR</a>
-                </li>
             </ul>
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf

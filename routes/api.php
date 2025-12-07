@@ -18,5 +18,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/locations', [GameController::class, 'getLocations']);
 
     Route::get('/profile', [ProgressController::class, 'getProfile']);
-    Route::post('/missions/{mission}/complete', [ProgressController::class, 'completeMission']);
+    Route::post('/missions/{mission}/start', [ProgressController::class, 'startMission']);
+    Route::post('/missions/{mission}/finish', [ProgressController::class, 'finishMission']);
 });

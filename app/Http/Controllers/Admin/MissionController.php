@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class MissionController extends Controller
 {
-
     public function index()
     {
         $missions = Mission::with('badge')->latest()->paginate(10);
@@ -26,7 +25,10 @@ class MissionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'type' => 'required|in:book,building,quiz',
             'description' => 'required|string',
+            'target_image_name' => 'nullable|required_unless:type,quiz|string|max:255',
+            'quiz_data' => 'nullable|required_if:type,quiz|json',
             'points_reward' => 'required|integer|min:0',
             'badge_reward_id' => 'nullable|exists:badges,id'
         ]);
@@ -47,7 +49,10 @@ class MissionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'type' => 'required|in:book,building,quiz',
             'description' => 'required|string',
+            'target_image_name' => 'nullable|required_unless:type,quiz|string|max:255',
+            'quiz_data' => 'nullable|required_if:type,quiz|json',
             'points_reward' => 'required|integer|min:0',
             'badge_reward_id' => 'nullable|exists:badges,id'
         ]);
