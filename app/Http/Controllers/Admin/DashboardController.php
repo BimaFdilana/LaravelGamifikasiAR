@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserMission;
 use App\Models\Badge;
+use App\Models\Location;
+use App\Models\Mission;
 
 class DashboardController extends Controller
 {
@@ -15,6 +17,9 @@ class DashboardController extends Controller
         $totalUsers = User::where('role', 'mahasiswa')->count();
         $missionsCompleted = UserMission::where('status', 'completed')->count();
         $totalBadges = Badge::count();
+        $totalMissions = Mission::count();
+        $missionsByType = Mission::selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type');
+        $totalLocations = Location::count();
 
         $leaderboard = User::where('role', 'mahasiswa')
             ->orderBy('total_points', 'desc')
@@ -25,6 +30,9 @@ class DashboardController extends Controller
             'totalUsers' => $totalUsers,
             'missionsCompleted' => $missionsCompleted,
             'totalBadges' => $totalBadges,
+            'totalMissions' => $totalMissions,
+            'missionsByType' => $missionsByType,
+            'totalLocations' => $totalLocations,
             'leaderboard' => $leaderboard,
         ]);
     }

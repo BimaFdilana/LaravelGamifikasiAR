@@ -29,12 +29,12 @@ class LoginController extends Controller
             Auth::logout();
             return back()->withErrors([
                 'email' => 'Akses ditolak. Anda bukan admin.',
-            ]);
+            ])->onlyInput('email');
         }
 
         return back()->withErrors([
             'email' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
-        ]);
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request)
