@@ -422,3 +422,26 @@ body.brand {
     html { scroll-behavior: auto; }
     .tile img { transition: none; }
 }
+
+/* ============================================================
+   PENANDA NAVIGASI (admin)
+   ============================================================ */
+.marker-intro { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; background: var(--white); border: 1px solid var(--line); border-left: 6px solid var(--amber); border-radius: 12px; padding: 22px 26px; margin-bottom: 28px; }
+.marker-intro h2 { font-size: 1.25rem; margin: 0 0 8px; }
+.marker-intro ul { margin: 0; padding-left: 1.1em; color: var(--muted); }
+.marker-intro li + li { margin-top: 4px; }
+.marker-intro li b { color: var(--ink); font-weight: 600; }
+.marker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+.marker-card { background: var(--white); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.marker-card .pic { position: relative; background: var(--indigo-soft); padding: 18px; }
+.marker-card .pic img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: var(--white); }
+.marker-card .pic .page { position: absolute; top: 28px; left: 28px; background: var(--indigo); color: var(--white); font: 600 .75rem/1 var(--font-body); padding: 6px 9px; border-radius: 6px; }
+.marker-card .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.marker-card h3 { font-size: 1.15rem; margin: 0; }
+.marker-card code { align-self: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: .8rem; color: var(--indigo); }
+.marker-card p { margin: 6px 0 14px; color: var(--muted); font-size: .92rem; flex: 1; }
+.marker-card .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 767px) {
+    .marker-intro { grid-template-columns: 1fr; }
+}

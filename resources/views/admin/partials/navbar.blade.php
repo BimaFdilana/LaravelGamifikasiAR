@@ -25,6 +25,7 @@
                     <li><a class="{{ request()->routeIs('admin.missions.*') ? 'active' : '' }}" href="{{ route('admin.missions.index') }}">Misi</a></li>
                     <li><a class="{{ request()->routeIs('admin.badges.*') ? 'active' : '' }}" href="{{ route('admin.badges.index') }}">Lencana</a></li>
                     <li><a class="{{ request()->routeIs('admin.locations.*') ? 'active' : '' }}" href="{{ route('admin.locations.index') }}">Lokasi</a></li>
+                    <li><a class="{{ request()->routeIs('admin.markers.*') ? 'active' : '' }}" href="{{ route('admin.markers.index') }}">Penanda</a></li>
                 </ul>
             </nav>
             <div class="who">
