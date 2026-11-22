@@ -47,7 +47,7 @@
 
                 <div class="card p-4">
                     <div class="card-body">
-                        <form action="{{ route('admin.missions.store') }}" method="POST">
+                        <form action="{{ route('admin.missions.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             {{-- Judul & Tipe --}}
@@ -56,7 +56,7 @@
                                     <label class="form-label">Judul Misi <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-heading"></i></span>
-                                        <input type="text" name="title" class="form-control" required>
+                                        <input type="text" name="title" value="{{ old('title') }}" class="form-control" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-4">
@@ -64,22 +64,39 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-tags"></i></span>
                                         <select name="type" id="typeSelect" class="form-select" required onchange="toggleFields()">
-                                            <option value="book">Book (AR)</option>
-                                            <option value="building">Building (AR)</option>
-                                            <option value="quiz">Quiz (UI)</option>
+                                            <option value="building" {{ old('type', 'building') == 'building' ? 'selected' : '' }}>Pencarian Gedung (AR)</option>
+                                            <option value="quiz" {{ old('type') == 'quiz' ? 'selected' : '' }}>Kuis</option>
+                                            <option value="book" {{ old('type') == 'book' ? 'selected' : '' }}>Pencarian Buku (AR, lama)</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Target Vuforia (AKAN DISEMBUNYIKAN JIKA QUIZ) --}}
-                            <div class="mb-4" id="targetField">
-                                <label class="form-label">Nama Target Vuforia <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-cube"></i></span>
-                                    <input type="text" name="target_image_name" id="targetInput" class="form-control" placeholder="Sesuai Database Vuforia Unity">
+                            {{-- Target AR (disembunyikan jika Kuis) --}}
+                            <div class="mb-4 p-4 border rounded bg-white shadow-sm" id="targetField" style="border-left: 5px solid #198754 !important;">
+                                <h5 class="fw-bold text-success mb-3"><i class="fas fa-camera me-2"></i>Target AR</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Gambar Target (foto/poster yang akan dipindai kamera)</label>
+                                    <input type="file" name="target_image" accept="image/jpeg,image/png" class="form-control border rounded">
+                                    <div class="form-text text-muted">JPG/PNG, maks 5 MB. Gunakan gambar yang detail dan kontras (bukan gambar polos). Gambar ini dicetak lalu ditempel di lokasi.</div>
                                 </div>
-                                <div class="form-text text-muted">Wajib diisi untuk tipe AR (Book/Building).</div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Lebar cetak gambar (meter)</label>
+                                        <input type="number" step="0.01" min="0.05" max="10" name="target_width" value="{{ old('target_width', '0.5') }}" class="form-control border rounded" placeholder="0.5">
+                                        <div class="form-text text-muted">Ukur lebar gambar setelah dicetak. Contoh: A4 mendatar = 0.30.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Nama target bawaan aplikasi <small class="text-muted">(opsional)</small></label>
+                                        <input type="text" name="target_image_name" id="targetInput" value="{{ old('target_image_name') }}" class="form-control border rounded" placeholder="Contoh: Gedung1">
+                                        <div class="form-text text-muted">Isi hanya jika memakai target yang sudah tertanam di aplikasi (Gedung1–Gedung4). Kosongkan jika meng-upload gambar target.</div>
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Gambar Sampul <small class="text-muted">(opsional, ditampilkan sebagai petunjuk di aplikasi)</small></label>
+                                    <input type="file" name="cover_image" accept="image/jpeg,image/png" class="form-control border rounded">
+                                    <div class="form-text text-muted">Jika kosong, aplikasi memakai gambar target sebagai sampul.</div>
+                                </div>
                             </div>
 
                             {{-- QUIZ BUILDER SECTION --}}
@@ -115,7 +132,7 @@
                             {{-- Deskripsi & Reward (Sama seperti sebelumnya) --}}
                             <div class="mb-4">
                                 <label class="form-label">Deskripsi Misi</label>
-                                <textarea class="form-control border rounded" style="height:100px" name="description"></textarea>
+                                <textarea class="form-control border rounded" style="height:100px" name="description" required>{{ old('description') }}</textarea>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-4">
@@ -175,7 +192,7 @@
                 document.getElementById('quiz_data_input').value = "";
 
                 targetField.style.display = "block";
-                targetInput.setAttribute('required', 'required'); // Wajib isi target
+                // target boleh upload gambar ATAU nama target bawaan (dicek di server)
             }
         }
 

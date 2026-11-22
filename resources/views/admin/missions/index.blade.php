@@ -70,12 +70,17 @@
                                             </div>
                                             <div>
                                                 <div class="fw-bold text-dark">{{ $mission->title }}</div>
-                                                <small class="text-muted">Target: {{ $mission->target_image_name }}</small>
+                                                @if($mission->type !== 'quiz')
+                                                    <small class="text-muted">Target: {{ $mission->target_image_path ? 'gambar upload' . ($mission->target_width ? ' (' . $mission->target_width . ' m)' : '') : ($mission->target_image_name ?: '-') }}</small>
+                                                @else
+                                                    <small class="text-muted">{{ \Illuminate\Support\Str::limit($mission->quiz_data['question'] ?? '', 60) }}</small>
+                                                @endif
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary badge-type">{{ strtoupper($mission->type) }}</span>
+                                        @if($mission->cover_image_url)<img src="{{ $mission->cover_image_url }}" alt="" style="height:34px;width:34px;object-fit:cover;border-radius:6px" class="me-2">@endif
+                                        <span class="badge bg-secondary badge-type">{{ $mission->type_label }}</span>
                                     </td>
                                     <td>
                                         <span class="badge badge-soft-warning px-3 py-2 rounded-pill">

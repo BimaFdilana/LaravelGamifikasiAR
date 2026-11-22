@@ -7,67 +7,94 @@ use App\Models\Badge;
 use App\Models\Location;
 use App\Models\Mission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GameController extends Controller
 {
+    /** Urutan kategori misi: pencarian gedung dulu, lalu kuis. Tipe buku (lama) ditaruh paling akhir. */
+    private const TYPE_ORDER = ['building', 'quiz', 'book'];
+
     /**
-     * Mengambil daftar misi.
-     * JIKA user belum punya history misi, sistem akan mengacak urutan (Randomizer)
-     * lalu menyimpannya ke database user tersebut.
+     * Mengambil daftar misi milik user.
+     * - User baru: urutan misi dibuat acak per kategori.
+     * - User lama: misi yang baru ditambahkan admin otomatis ditambahkan di akhir daftar.
      */
     public function getMissions(Request $request)
     {
         $user = $request->user();
 
-        // 1. CEK: Apakah user ini sudah punya urutan misi di database?
-        // Jika count == 0, berarti dia user baru atau belum pernah buka menu misi.
         if ($user->missions()->count() === 0) {
             $this->generateRandomMissionsForUser($user);
+        } else {
+            $this->appendNewMissionsForUser($user);
+            $this->ensureOneOpenMission($user);
         }
 
-        // 2. AMBIL: Ambil data dari relasi user->missions
-        // Laravel otomatis mengurutkan berdasarkan 'order' di tabel pivot
-        // (Pastikan Anda sudah update Model User.php seperti langkah sebelumnya)
         $missions = $user->missions()->with('badge')->get();
-
         return response()->json($missions);
     }
 
-    /**
-     * Logic Pengacakan Soal (Private)
-     */
-    private function generateRandomMissionsForUser($user)
+    private function orderedMissions($exceptIds = [])
     {
-        // A. Ambil misi per kategori dan ACAK urutannya
-        $books = Mission::where('type', 'book')->inRandomOrder()->get();
-        $buildings = Mission::where('type', 'building')->inRandomOrder()->get();
-        $quizzes = Mission::where('type', 'quiz')->inRandomOrder()->get();
+        $result = collect();
+        foreach (self::TYPE_ORDER as $type) {
+            $result = $result->merge(
+                Mission::where('type', $type)->whereNotIn('id', $exceptIds)->inRandomOrder()->get()
+            );
+        }
+        return $result;
+    }
 
-        // B. Gabungkan: Buku -> Gedung -> Kuis (Isi per kategori sudah acak)
-        $finalSequence = $books->merge($buildings)->merge($quizzes);
-
+    private function generateRandomMissionsForUser($user): void
+    {
         $syncData = [];
         $order = 1;
-
-        foreach ($finalSequence as $mission) {
-            // Misi urutan pertama (1) statusnya 'in_progress' agar tombol MULAI muncul di Unity
-            // Sisanya 'locked'
-            $status = ($order === 1) ? 'in_progress' : 'locked';
-
+        foreach ($this->orderedMissions() as $mission) {
             $syncData[$mission->id] = [
                 'order' => $order,
-                'status' => $status,
+                'status' => $order === 1 ? 'in_progress' : 'locked',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
             $order++;
         }
+        if ($syncData) $user->missions()->attach($syncData);
+    }
 
-        // C. Simpan ke tabel pivot user_missions sekaligus
+    private function appendNewMissionsForUser($user): void
+    {
+        $existingIds = DB::table('user_missions')->where('user_id', $user->id)->pluck('mission_id')->all();
+        $newMissions = $this->orderedMissions($existingIds);
+        if ($newMissions->isEmpty()) return;
+
+        $maxOrder = (int) DB::table('user_missions')->where('user_id', $user->id)->max('order');
+        // Jika semua misi lama sudah selesai, misi baru pertama langsung dibuka.
+        $hasOpen = DB::table('user_missions')->where('user_id', $user->id)
+            ->whereIn('status', ['in_progress', 'locked'])->exists();
+
+        $syncData = [];
+        $order = $maxOrder + 1;
+        foreach ($newMissions as $i => $mission) {
+            $syncData[$mission->id] = [
+                'order' => $order++,
+                'status' => (!$hasOpen && empty($syncData)) ? 'in_progress' : 'locked',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
         $user->missions()->attach($syncData);
     }
 
-    // --- Method Lain Tetap Sama ---
+    /** Jika misi yang sedang berjalan dihapus admin, buka misi terkunci berikutnya. */
+    private function ensureOneOpenMission($user): void
+    {
+        $hasInProgress = DB::table('user_missions')->where('user_id', $user->id)->where('status', 'in_progress')->exists();
+        if ($hasInProgress) return;
+        $next = DB::table('user_missions')->where('user_id', $user->id)->where('status', 'locked')->orderBy('order')->first();
+        if ($next) {
+            DB::table('user_missions')->where('id', $next->id)->update(['status' => 'in_progress', 'updated_at' => now()]);
+        }
+    }
 
     public function getMissionDetail(Mission $mission)
     {
@@ -77,13 +104,11 @@ class GameController extends Controller
 
     public function getBadges()
     {
-        $badges = Badge::all();
-        return response()->json($badges);
+        return response()->json(Badge::all());
     }
 
     public function getLocations()
     {
-        $locations = Location::all();
-        return response()->json($locations);
+        return response()->json(Location::all());
     }
 }

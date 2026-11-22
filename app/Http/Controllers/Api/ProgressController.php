@@ -111,7 +111,9 @@ class ProgressController extends Controller
         $nextOrder = $currentOrder + 1;
 
         // Cari ID user_missions berikutnya
-        $nextMissionPivot = \DB::select('SELECT id, mission_id FROM user_missions WHERE user_id = ? AND `order` = ?', [$user->id, $nextOrder]);
+        // Misi berikutnya = urutan terdekat setelah misi ini yang belum selesai
+        // (tetap benar walaupun ada misi yang dihapus admin sehingga urutan bolong).
+        $nextMissionPivot = \DB::select('SELECT id, mission_id FROM user_missions WHERE user_id = ? AND `order` > ? AND status <> "completed" ORDER BY `order` ASC LIMIT 1', [$user->id, $currentOrder]);
 
         $nextMissionData = null;
         if (!empty($nextMissionPivot)) {

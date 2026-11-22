@@ -43,7 +43,7 @@
 
                 <div class="card p-4">
                     <div class="card-body">
-                        <form action="{{ route('admin.missions.update', $mission->id) }}" method="POST">
+                        <form action="{{ route('admin.missions.update', $mission->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -60,20 +60,50 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-tags"></i></span>
                                         <select name="type" id="typeSelect" class="form-select" required onchange="toggleFields()">
-                                            <option value="book" {{ old('type', $mission->type) == 'book' ? 'selected' : '' }}>Book (AR)</option>
-                                            <option value="building" {{ old('type', $mission->type) == 'building' ? 'selected' : '' }}>Building (AR)</option>
-                                            <option value="quiz" {{ old('type', $mission->type) == 'quiz' ? 'selected' : '' }}>Quiz (UI)</option>
+                                            <option value="building" {{ old('type', $mission->type) == 'building' ? 'selected' : '' }}>Pencarian Gedung (AR)</option>
+                                            <option value="quiz" {{ old('type', $mission->type) == 'quiz' ? 'selected' : '' }}>Kuis</option>
+                                            <option value="book" {{ old('type', $mission->type) == 'book' ? 'selected' : '' }}>Pencarian Buku (AR, lama)</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Target Vuforia (Toggle Visibility) --}}
-                            <div class="mb-4" id="targetField">
-                                <label class="form-label">Nama Target Vuforia <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-cube"></i></span>
-                                    <input type="text" name="target_image_name" id="targetInput" value="{{ old('target_image_name', $mission->target_image_name) }}" class="form-control">
+                            {{-- Target AR (disembunyikan jika Kuis) --}}
+                            <div class="mb-4 p-4 border rounded bg-white shadow-sm" id="targetField" style="border-left: 5px solid #198754 !important;">
+                                <h5 class="fw-bold text-success mb-3"><i class="fas fa-camera me-2"></i>Target AR</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Gambar Target (foto/poster yang akan dipindai kamera)</label>
+                                    @if($mission->target_image_url)
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <img src="{{ $mission->target_image_url }}" alt="target" style="height:90px;border-radius:8px;border:1px solid #dee2e6">
+                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="remove_target_image" value="1" id="rmTarget"><label class="form-check-label small" for="rmTarget">Hapus gambar ini</label></div>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="target_image" accept="image/jpeg,image/png" class="form-control border rounded">
+                                    <div class="form-text text-muted">JPG/PNG, maks 5 MB. Gunakan gambar yang detail dan kontras (bukan gambar polos). Gambar ini dicetak lalu ditempel di lokasi.</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Lebar cetak gambar (meter)</label>
+                                        <input type="number" step="0.01" min="0.05" max="10" name="target_width" value="{{ old('target_width', $mission->target_width ?? '0.5') }}" class="form-control border rounded" placeholder="0.5">
+                                        <div class="form-text text-muted">Ukur lebar gambar setelah dicetak. Contoh: A4 mendatar = 0.30.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Nama target bawaan aplikasi <small class="text-muted">(opsional)</small></label>
+                                        <input type="text" name="target_image_name" id="targetInput" value="{{ old('target_image_name', $mission->target_image_name) }}" class="form-control border rounded" placeholder="Contoh: Gedung1">
+                                        <div class="form-text text-muted">Isi hanya jika memakai target yang sudah tertanam di aplikasi (Gedung1–Gedung4). Kosongkan jika meng-upload gambar target.</div>
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Gambar Sampul <small class="text-muted">(opsional, ditampilkan sebagai petunjuk di aplikasi)</small></label>
+                                    @if($mission->cover_image_path)
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <img src="{{ asset($mission->cover_image_path) }}" alt="sampul" style="height:90px;border-radius:8px;border:1px solid #dee2e6">
+                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="remove_cover_image" value="1" id="rmCover"><label class="form-check-label small" for="rmCover">Hapus gambar ini</label></div>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="cover_image" accept="image/jpeg,image/png" class="form-control border rounded">
+                                    <div class="form-text text-muted">Jika kosong, aplikasi memakai gambar target sebagai sampul.</div>
                                 </div>
                             </div>
 
@@ -153,7 +183,7 @@
                 visualQuestion.removeAttribute('required');
 
                 targetField.style.display = "block";
-                targetInput.setAttribute('required', 'required');
+                // target boleh upload gambar ATAU nama target bawaan (dicek di server)
             }
         }
 
@@ -168,8 +198,9 @@
                 document.getElementById('visual_question').value = data.question || '';
                 const container = document.getElementById('answers_container');
                 container.innerHTML = '';
-                if (data.answers && Array.isArray(data.answers)) {
-                    data.answers.forEach((ans, index) => {
+                const opts = data.answers || data.options;
+                if (opts && Array.isArray(opts)) {
+                    opts.forEach((ans, index) => {
                         const isCorrect = (index === parseInt(data.correct_index));
                         addOptionHTML(ans, index, isCorrect);
                     });
