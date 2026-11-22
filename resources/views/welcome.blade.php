@@ -2,6 +2,8 @@
     $apkPath = public_path('downloads/ARPolbeng.apk');
     $apkReady = file_exists($apkPath);
     $apkSize = $apkReady ? number_format(filesize($apkPath) / 1048576, 0) . ' MB' : null;
+    // ?v= mengikuti waktu file, supaya cache Cloudflare tidak menyajikan APK lama setelah diganti
+    $apkUrl = $apkReady ? asset('downloads/ARPolbeng.apk') . '?v=' . filemtime($apkPath) : '#';
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -49,7 +51,7 @@
                     </p>
                     <div class="hero-actions">
                         @if ($apkReady)
-                            <a href="{{ asset('downloads/ARPolbeng.apk') }}" class="btn-brand amber" download>
+                            <a href="{{ $apkUrl }}" class="btn-brand amber" download>
                                 <i class="fa-brands fa-android" aria-hidden="true"></i> Unduh APK Android
                             </a>
                         @else
@@ -172,7 +174,7 @@
                 </div>
                 <div class="cta-actions">
                     @if ($apkReady)
-                        <a href="{{ asset('downloads/ARPolbeng.apk') }}" class="btn-brand indigo" download>
+                        <a href="{{ $apkUrl }}" class="btn-brand indigo" download>
                             <i class="fa-brands fa-android" aria-hidden="true"></i> Unduh APK Android
                         </a>
                         <small>ARPolbeng.apk &middot; {{ $apkSize }}</small>
