@@ -23,14 +23,14 @@ class MissionSeeder extends Seeder
 
         // 2. Pencarian gedung (target bawaan aplikasi: Gedung1-4, lebar cetak 0,5 m)
         $gedung = [
-            ['Temukan Gedung Teknik Elektro', 'Gedung1', 1,
-                'Cari Gedung Teknik Elektro. Perpustakaan Polbeng juga berada di gedung ini, di sisi kanan bila dilihat dari jalan utama. Pindai penanda gedung untuk menyelesaikan misi.'],
-            ['Temukan Gedung Direktorat (BAAK)', 'Gedung2', 2,
-                'Cari gedung utama Polbeng, tempat bagian administrasi dan staf (BAAK). Pindai penanda gedung untuk menyelesaikan misi.'],
-            ['Temukan Gedung Teknik Informatika', 'Gedung3', 3,
-                'Cari Gedung Jurusan Teknik Informatika. Pindai penanda gedung untuk menyelesaikan misi.'],
-            ['Temukan Gedung Administrasi Niaga', 'Gedung4', null,
-                'Cari Gedung Jurusan Administrasi Niaga. Pindai penanda gedung untuk menyelesaikan misi.'],
+            ['Temukan Gedung Teknik Elektro', 'POLBENG-GEDUNG-1', 1,
+                'Cari Gedung Teknik Elektro, lalu pindai QR code penanda yang terpasang di gedung tersebut untuk menyelesaikan misi. Perpustakaan Polbeng berada di gedung ini, di sisi kanan bila dilihat dari jalan utama.'],
+            ['Temukan Gedung Direktorat (BAAK)', 'POLBENG-GEDUNG-2', 2,
+                'Cari gedung utama Polbeng (BAAK), lalu pindai QR code penanda yang terpasang di gedung tersebut untuk menyelesaikan misi.'],
+            ['Temukan Gedung Teknik Informatika', 'POLBENG-GEDUNG-3', 3,
+                'Cari Gedung Jurusan Teknik Informatika, lalu pindai QR code penanda yang terpasang di gedung tersebut untuk menyelesaikan misi.'],
+            ['Temukan Gedung Administrasi Niaga', 'POLBENG-GEDUNG-4', null,
+                'Cari Gedung Jurusan Administrasi Niaga, lalu pindai QR code penanda yang terpasang di gedung tersebut untuk menyelesaikan misi.'],
         ];
         foreach ($gedung as [$title, $target, $badge, $desc]) {
             Mission::updateOrCreate(['title' => $title], [
